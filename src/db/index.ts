@@ -10,7 +10,7 @@ export function getDb() {
       throw new Error("DATABASE_URL environment variable is not set");
     }
     // Create postgres client
-    const client = postgres(process.env.DATABASE_URL);
+    const client = postgres(process.env.DATABASE_URL, { connect_timeout: 5, idle_timeout: 20, max: 10 });
     // Create drizzle instance
     db = drizzle(client, { schema });
   }

@@ -36,5 +36,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# drizzle
-/drizzle
+# production environment and backups
+.env.*
+!.env.example
+!.env.production.example
+/backups/

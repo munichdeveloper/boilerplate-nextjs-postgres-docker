@@ -1,0 +1,75 @@
+# Distribution: images only; works without a source checkout. No secrets defaults.
+x-app: &app
+  image: ${APP_IMAGE:?Set APP_IMAGE to a published version or digest}
+  init: true
+  read_only: true
+  tmpfs:
+    - /tmp
+    - /app/.next/cache:uid=1000,gid=1000
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  networks: [database, edge]
+  logging:
+    driver: local
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-alpine@sha256:aa6cb33cf4c19c765cefcf48d96176258800870a9a1e930ad126200f9d825139
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a strong POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  migrate:
+    <<: *app
+    restart: "no"
+    command: [node, scripts/migrate.mjs]
+    healthcheck:
+      disable: true
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set a strong POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:?Set POSTGRES_DB}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set a distinct strong APP_DB_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    restart: unless-stopped
+    environment:
+      DB_USER: app
+      DB_PASSWORD: ${APP_DB_PASSWORD:?Set a distinct strong APP_DB_PASSWORD}
+      DB_NAME: ${POSTGRES_DB:?Set POSTGRES_DB}
+    ports:
+      - "${WEB_BIND_IP:-127.0.0.1}:${WEB_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+networks:
+  database:
+    internal: true
+  edge:
