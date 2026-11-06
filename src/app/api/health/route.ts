@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/db";
 import { sql } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     // Test database connection
@@ -13,14 +15,12 @@ export async function GET() {
       database: "connected",
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    console.error("Health check failed:", error);
+  } catch {
     
     return NextResponse.json(
       {
         status: "unhealthy",
         database: "disconnected",
-        error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
       { status: 503 }
