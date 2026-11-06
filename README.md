@@ -42,7 +42,9 @@ The example schema has users and posts. `src/db/index.ts` keeps a lazy connectio
 ## Install A: Deploy on Hostinger (staged / untested)
 
 <!-- HOSTINGER_BUTTON -->
-The official badge will link to this PR's public raw Compose file once the branch is pushed. It remains staged until all release gates pass.
+[![Deploy on Hostinger](https://assets.hostinger.com/vps/deploy.svg)](https://www.hostinger.com/docker-hosting?compose_url=https%3A%2F%2Fraw.githubusercontent.com%2Fmunichdeveloper%2Fboilerplate-nextjs-postgres-docker%2Fd9227fc3e9c26206afc4826e24028ba4242844bc%2Fcompose.production.yml)
+
+**Staged / not deployment-validated.** This public Compose URL is pinned to an existing review commit because no release tag exists yet. Image publication, secure ENV entry and Hostinger import are pending.
 <!-- /HOSTINGER_BUTTON -->
 
 Uses the [official Hostinger button syntax](https://www.hostinger.com/support/deploy-on-hostinger-button/). The link imports a **single Compose file**, not a source checkout. It references images only and requires a published `APP_IMAGE`; there is no `build: .`. No affiliate/referral identifier is included.

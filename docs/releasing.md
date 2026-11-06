@@ -11,7 +11,7 @@ After review and explicit publication approval:
 5. On an already authorized non-production Hostinger VPS, verify Compose import, required ENV interpolation, secure password entry, internal networking, completed migration dependency, image pull and HTTPS/health. If secure ENV entry is unavailable, keep the button marked blocked and direct users to SSH/manual installation.
 6. Only after all gates succeed remove **staged** wording and record the tested release, import date and results. No resource purchase or live deployment is authorized by this PR.
 
-The branch URL in the staged badge exists for review after pushing; it is mutable and not a stable distribution release. Manual VPS installation is equally supported and uses the same file/images.
+The staged badge pins the public raw Compose file to an existing review commit; it is immutable but not yet an approved distribution release. Manual VPS installation is equally supported and uses the same file/images.
 
 ## Security verification scope
 

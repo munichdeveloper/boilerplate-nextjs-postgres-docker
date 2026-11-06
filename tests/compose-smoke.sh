@@ -49,7 +49,8 @@ curl -fsS --noproxy "*" "http://127.0.0.1:${TEST_PORT_B:-18082}/api/health" >/de
 # Different data and credentials, with no shared database network or volume.
 compose "$a" exec -T postgres psql -U postgres -d smoke -c "insert into users(name,email) values ('persistence','only-a@example.test')"
 test "$(compose "$b" exec -T postgres psql -U postgres -d smoke -Atc 'select count(*) from users')" = 0
-if compose "$b" exec -T -e PGPASSWORD="$password_a" postgres psql -h 127.0.0.1 -U app -d smoke -c 'select 1' > /dev/null 2>&1; then
+# Test over the actual container network; postgres image trusts its own loopback.
+if compose "$b" exec -T -e DB_PASSWORD="$password_a" web node -e 'const sql=require("postgres")(require("./scripts/database-url.cjs").databaseUrl(process.env),{connect_timeout:5});sql`select 1`.then(()=>sql.end()).catch(()=>process.exit(1))' > /dev/null 2>&1; then
   echo 'Cross-instance password unexpectedly accepted' >&2; exit 1
 fi
 test "$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}{{end}}{{end}}' "$(compose "$a" ps -q postgres)")" != "$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}{{end}}{{end}}' "$(compose "$b" ps -q postgres)")"
